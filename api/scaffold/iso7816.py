@@ -72,7 +72,7 @@ class ATRInfo:
         self.protocols = set()
 
 
-class ScaffoldISO7816ATRByteReader:
+class ScaffoldISO7816ByteReader:
     """ Used for `parse_atr` function with a Scaffold device. """
     def __init__(self, iso7816):
         """ :param iso7816: Scaffold ISO7816 module. """
@@ -206,11 +206,13 @@ class Smartcard:
     :var set protocols: Communication protocols found in ATR. This set contains
         integers, for instance 0 if T=0 is supported, 1 if T=1 is supported...
     """
-    def __init__(self, scaffold):
+    def __init__(self, scaffold=None):
         """
         Configure a Scaffold board for use with smartcards.
         :param scaffold: :class:`scaffold.Scaffold` instance.
         """
+        if scaffold is None:
+            scaffold = Scaffold()
         self.iso7816 = scaffold.iso7816
         self.scaffold = scaffold
         self.sig_nrst = scaffold.d1
@@ -251,6 +253,7 @@ class Smartcard:
         self.iso7816.flush()
         self.sig_nrst << 1
         info = parse_atr(ScaffoldISO7816ByteReader(self.iso7816))
+        self.atr = info.atr
         self.convention = info.convention
         self.protocols = info.protocols
         # Verify that there are no more bytes
